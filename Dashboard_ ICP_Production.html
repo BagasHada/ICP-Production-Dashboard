@@ -1,0 +1,645 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Analitik Harga dan Produksi Minyak Indonesia, 2016–2024</title>
+<style>
+:root{
+  --bg:#F3F5F6; --panel:#FFFFFF; --ink:#15232D; --muted:#586773; --line:#DCE1E5;
+  --prod:#1D5C78; --icp:#C47A12; --icp-ink:#8A5309; --base:#6F7D88; --soft:#A8B3BC;
+  --caution:#FCF3E0; --caution-line:#E9C77E; --ok:#2C7A6B;
+  --serif:"Iowan Old Style","Palatino Linotype",Palatino,Georgia,"Times New Roman",serif;
+  --sans:"Inter","Segoe UI",system-ui,-apple-system,Roboto,"Helvetica Neue",Arial,sans-serif;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.55 var(--sans);font-variant-numeric:tabular-nums}
+.wrap{max-width:1180px;margin:0 auto;padding:0 24px}
+a{color:var(--prod)}
+:focus-visible{outline:2px solid var(--icp);outline-offset:2px}
+
+/* header */
+header{padding:40px 0 26px}
+.project{margin:0 0 10px;color:var(--muted);font:italic 15px/1.4 var(--serif)}
+h1{margin:0;font:600 clamp(24px,3.6vw,38px)/1.12 var(--serif);letter-spacing:.02em}
+.sub{margin:10px 0 0;max-width:760px;color:var(--muted);font-size:16px}
+.meta{margin:16px 0 0;display:flex;flex-wrap:wrap;gap:8px 22px;color:var(--muted);font-size:13px}
+.meta b{color:var(--ink);font-weight:600}
+
+/* kpi */
+.kpis{display:grid;grid-template-columns:repeat(4,1fr);background:var(--panel);border:1px solid var(--line);border-radius:6px}
+.kpi{padding:20px 22px;border-left:1px solid var(--line)}
+.kpi:first-child{border-left:0}
+.kl{font-size:13px;color:var(--muted)}
+.kv{margin:4px 0 2px;font:600 clamp(26px,3vw,34px)/1.15 var(--serif)}
+.kv small{font:500 14px var(--sans);color:var(--muted);margin-left:4px}
+.ks{font-size:12.5px;color:var(--muted)}
+.kpi.hl .kv{color:var(--icp-ink)}
+.note-line{margin:12px 2px 0;font-size:13px;color:var(--muted)}
+
+/* sections */
+section{margin-top:44px}
+.sh{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:10px 20px;margin-bottom:14px}
+h2{margin:0;font:600 22px/1.25 var(--serif)}
+.lede{margin:4px 0 0;max-width:720px;color:var(--muted);font-size:14.5px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+.grid-lead{display:grid;grid-template-columns:minmax(0,1.9fr) minmax(0,1fr);gap:18px}
+.grid-fc{display:grid;grid-template-columns:minmax(0,1.75fr) minmax(0,1fr);gap:18px}
+.grid-ev{display:grid;grid-template-columns:minmax(0,1.55fr) minmax(0,1fr);gap:18px}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:16px 18px;min-width:0}
+.panel h3{margin:0 0 2px;font:600 15px/1.35 var(--sans)}
+.panel .cap{margin:0 0 8px;font-size:12.5px;color:var(--muted)}
+.panel .foot{margin:10px 0 0;font-size:12.5px;color:var(--muted)}
+.chart{width:100%;min-height:60px;position:relative}
+.chart svg{display:block;overflow:visible}
+.stack>.panel+.panel{margin-top:18px}
+
+/* svg text */
+svg .grid{stroke:#E8ECEF;stroke-width:1}
+svg .grid.zero{stroke:#9AA7B1}
+svg .tk{font:11px var(--sans);fill:var(--muted)}
+svg .axt{font:12px var(--sans);fill:var(--muted)}
+svg .ann{font:600 12px var(--sans);fill:var(--icp-ink)}
+svg .lbl{font:600 12px var(--sans);fill:var(--ink)}
+svg .xh{stroke:#7A8791;stroke-width:1;stroke-dasharray:3 3;display:none}
+svg .hd{display:none;stroke:#fff;stroke-width:1.5}
+svg .hit{fill:transparent;cursor:crosshair}
+
+/* controls */
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:5px;overflow:hidden;background:#fff}
+.seg button,.lg{font:500 13px var(--sans);color:var(--ink);background:#fff;border:0;padding:6px 12px;cursor:pointer}
+.seg button+button{border-left:1px solid var(--line)}
+.seg button[aria-pressed="true"]{background:var(--ink);color:#fff}
+.legend{display:flex;flex-wrap:wrap;gap:4px 14px;margin:0 0 8px}
+.lg{border:1px solid transparent;border-radius:4px;padding:3px 8px;display:inline-flex;align-items:center;gap:7px}
+.lg i{display:inline-block;width:18px;height:0;border-top:3px solid}
+.lg[aria-pressed="false"]{opacity:.4;text-decoration:line-through}
+
+/* tables */
+table{width:100%;border-collapse:collapse;font-size:14px}
+th,td{padding:8px 8px;text-align:right;border-bottom:1px solid var(--line)}
+th:first-child,td:first-child{text-align:left}
+th{font-weight:600;font-size:12.5px;color:var(--muted)}
+tr.hl td{background:var(--caution);font-weight:600}
+tr.sum td{color:var(--muted);border-bottom:0}
+.mini{margin-top:14px;font-size:13px}
+.mini th,.mini td{padding:6px 6px}
+.mini h4{margin:0 0 4px;font:600 13px var(--sans)}
+
+/* evidence */
+.ev{width:100%}
+.ev td{vertical-align:top;text-align:left;padding:11px 8px}
+.ev td:first-child{width:28%;font-weight:600}
+.ev td:nth-child(2){width:32%;color:var(--ink)}
+.ev td:nth-child(3){color:var(--muted)}
+.dot{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:7px;background:var(--ok)}
+.dot.c{background:var(--icp)}
+tr.caut td{background:var(--caution)}
+.callout{margin:12px 0 0;padding:10px 12px;background:var(--caution);border:1px solid var(--caution-line);border-radius:5px;font-size:13.5px}
+
+/* insights */
+.ins{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+.ins article{background:var(--panel);border:1px solid var(--line);border-left:4px solid var(--prod);border-radius:6px;padding:16px 18px}
+.ins article.c{border-left-color:var(--icp)}
+.ins h3{margin:0 0 6px;font:600 16px/1.35 var(--serif)}
+.ins p{margin:0;font-size:14.5px;color:#2E3D48}
+
+/* footer */
+footer{margin:48px 0 40px;padding-top:20px;border-top:1px solid var(--line);font-size:13px;color:var(--muted)}
+footer p{margin:0 0 8px;max-width:900px}
+details{margin:12px 0}
+summary{cursor:pointer;font-weight:600;color:var(--ink)}
+details ul{margin:8px 0 0;padding-left:18px}
+details li{margin:4px 0}
+.disc{font-weight:600;color:var(--ink)}
+
+#tip{position:fixed;z-index:20;display:none;pointer-events:none;background:var(--ink);color:#fff;padding:7px 10px;border-radius:5px;font-size:12.5px;line-height:1.4;max-width:260px}
+#tip b{font-weight:600}
+
+@media (max-width:980px){
+  .kpis{grid-template-columns:1fr 1fr}
+  .kpi:nth-child(3){border-left:0}
+  .kpi:nth-child(n+3){border-top:1px solid var(--line)}
+  .grid2,.grid-lead,.grid-fc,.grid-ev,.ins{grid-template-columns:1fr}
+}
+@media (max-width:520px){
+  .wrap{padding:0 14px}
+  .kpis{grid-template-columns:1fr}
+  .kpi{border-left:0;border-top:1px solid var(--line)}
+  .kpi:first-child{border-top:0}
+  .ev td:first-child,.ev td:nth-child(2){width:auto}
+  .ev,.ev tbody,.ev tr,.ev td{display:block;width:100%}
+  .ev td{padding:3px 8px}
+  .ev tr{padding:8px 0;border-bottom:1px solid var(--line)}
+}
+@media print{
+  body{background:#fff}.seg,.legend .lg{pointer-events:none}
+  section,.panel,.ins article{break-inside:avoid}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <p class="project">Analisis Hubungan Harga Minyak Mentah Indonesia (ICP) dan Produksi Minyak Indonesia</p>
+  <h1>ANALITIK HARGA DAN PRODUKSI MINYAK INDONESIA</h1>
+  <p class="sub">Analisis Time Series Indonesian Crude Price (ICP) dan Produksi Minyak Nasional, 2016–2024</p>
+  <div class="meta">
+    <span><b>108</b> observasi bulanan, Januari 2016 sampai Desember 2024</span>
+    <span>Sumber: Ditjen Migas ESDM (ICP dan produksi)</span>
+  </div>
+</header>
+
+<main>
+
+<div class="kpis" id="kpis" aria-label="Angka utama"></div>
+<p class="note-line">Dashboard ini menyajikan hubungan statistik (statistical association) dan informasi prediktif (predictive information). Dashboard ini tidak membuktikan hubungan kausal antara ICP dan produksi minyak Indonesia.</p>
+
+<!-- 2 -->
+<section id="s-ts">
+  <div class="sh">
+    <div>
+      <h2>ICP dan produksi minyak bulanan</h2>
+      <p class="lede">Kedua deret ditampilkan pada chart terpisah dengan skala masing-masing. Arahkan kursor untuk melihat nilai bulanan.</p>
+    </div>
+    <div class="seg" id="rangeSeg" role="group" aria-label="Periode"></div>
+  </div>
+  <div class="grid2">
+    <div class="panel">
+      <h3>Indonesian Crude Price (ICP)</h3>
+      <p class="cap">US$ per barel, bulanan</p>
+      <div class="chart" id="c-icp"></div>
+    </div>
+    <div class="panel">
+      <h3>Produksi minyak nasional</h3>
+      <p class="cap">Minyak mentah dan kondensat, barel per hari (BOPD), bulanan</p>
+      <div class="chart" id="c-prod"></div>
+    </div>
+  </div>
+</section>
+
+<!-- 3 -->
+<section id="s-chg">
+  <div class="sh">
+    <div>
+      <h2>Perubahan bulanan: ΔICP dan ΔProduksi</h2>
+      <p class="lede">Perubahan bulanan merupakan perubahan pertama (first difference), ΔY(t) = Y(t) − Y(t−1). Analisis menggunakan perubahan bulanan untuk mengurangi masalah non-stasioneritas (non-stationarity) pada kedua deret level (uji ADF pada level).</p>
+    </div>
+  </div>
+  <div class="grid-lead">
+    <div class="stack">
+      <div class="panel">
+        <h3>ΔICP</h3>
+        <p class="cap">Perubahan dari bulan sebelumnya, US$ per barel</p>
+        <div class="chart" id="c-dicp"></div>
+      </div>
+      <div class="panel">
+        <h3>ΔProduksi</h3>
+        <p class="cap">Perubahan dari bulan sebelumnya, BOPD</p>
+        <div class="chart" id="c-dprod"></div>
+      </div>
+    </div>
+    <div class="panel">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;flex-wrap:wrap">
+        <div><h3>ΔICP terhadap ΔProduksi</h3><p class="cap" style="margin-bottom:6px">Setiap titik adalah satu pasangan bulan</p></div>
+        <div class="seg" id="scatSeg" role="group" aria-label="Lag ICP untuk scatter"></div>
+      </div>
+      <div class="chart" id="c-scat"></div>
+      <p class="foot" id="scatFoot"></p>
+    </div>
+  </div>
+</section>
+
+<!-- 4 -->
+<section id="s-lag">
+  <div class="sh">
+    <div>
+      <h2>Hubungan lead-lag, lag 0 sampai 12 bulan</h2>
+      <p class="lede">Korelasi antara ΔICP k bulan sebelumnya dan ΔProduksi bulan ini, dihitung pada first difference.</p>
+    </div>
+  </div>
+  <div class="grid-lead">
+    <div class="panel">
+      <h3>Cross-correlation menurut lag ICP</h3>
+      <p class="cap">Korelasi Pearson, ΔICP(t−k) dengan ΔProduksi(t)</p>
+      <div class="chart" id="c-lead"></div>
+    </div>
+    <div class="panel" id="leadNote"></div>
+  </div>
+</section>
+
+<!-- 5 -->
+<section id="s-fc">
+  <div class="sh">
+    <div>
+      <h2>Kinerja forecast</h2>
+      <p class="lede">Peramalan (forecast) satu langkah ke depan (one-step-ahead) terhadap perubahan produksi bulanan (ΔProduction), menggunakan skema expanding window, Oktober 2021 sampai Desember 2024 (39 bulan). Model baseline menggunakan dinamika produksi masa lalu; model augmented menambahkan ΔICP Lag 6. Model ini meramalkan perubahan produksi bulanan, bukan level produksi secara langsung.</p>
+    </div>
+  </div>
+  <div class="grid-fc">
+    <div class="panel">
+      <h3>Aktual dan forecast ΔProduksi</h3>
+      <p class="cap">BOPD, perubahan bulanan (ΔProduction). Klik legenda untuk menampilkan atau menyembunyikan garis.</p>
+      <div class="legend" id="fcLegend"></div>
+      <div class="chart" id="c-fc"></div>
+    </div>
+    <div class="panel" id="fcPanel"></div>
+  </div>
+</section>
+
+<!-- 6 -->
+<section id="s-sens">
+  <div class="sh">
+    <div>
+      <h2>Sensitivitas lag</h2>
+      <p class="lede">Prosedur forecast yang sama diulang untuk lag ICP 1 sampai 12 pada jendela 39 bulan yang sama. Setiap titik adalah satu lag; garis putus-putus adalah error baseline.</p>
+    </div>
+    <div class="seg" id="sensSeg" role="group" aria-label="Metrik error"></div>
+  </div>
+  <div class="panel">
+    <h3 id="sensTitle"></h3>
+    <p class="cap">Titik di bawah garis baseline berarti error forecast lebih rendah daripada baseline pada setup ini.</p>
+    <div class="chart" id="c-sens"></div>
+    <p class="foot">Lag 6 merupakan lag dengan performa terbaik di antara lag 1–12 yang diuji pada periode evaluasi yang sama. Lag 6 juga merupakan kandidat yang dipilih dari sampel yang sama, sehingga ini adalah perbandingan dalam satu setup yang dievaluasi dan bukan bukti waktu respons (response time) yang sebenarnya.</p>
+  </div>
+</section>
+
+<!-- 7 -->
+<section id="s-ev">
+  <div class="sh">
+    <div>
+      <h2>Bukti statistik</h2>
+      <p class="lede">Model final: ΔProduksi(t) pada ΔProduksi(t−1), ΔProduksi(t−2), dan ΔICP(t−6), diestimasi pada 101 observasi bulanan.</p>
+    </div>
+  </div>
+  <div class="grid-ev">
+    <div class="panel" style="padding-bottom:8px">
+      <table class="ev" id="evTable"></table>
+    </div>
+    <div class="panel">
+      <h3>Koefisien ICP Lag 6: standard error OLS dan HC3</h3>
+      <p class="cap">Estimasi titik dengan confidence interval 95%, BOPD per perubahan 1 US$/bbl pada ΔICP(t−6)</p>
+      <div class="chart" id="c-ci"></div>
+      <div class="callout" id="hc3Note"></div>
+    </div>
+  </div>
+</section>
+
+<!-- 8 -->
+<section id="s-ins">
+  <div class="sh"><div><h2>Insight utama</h2></div></div>
+  <div class="ins" id="ins"></div>
+</section>
+
+</main>
+
+<footer>
+  <p class="disc">Proyek ini mengidentifikasi hubungan statistik (statistical association) dan informasi prediktif (predictive information). Proyek ini tidak membuktikan hubungan kausal antara ICP dan produksi minyak Indonesia.</p>
+  <p>Sumber data: Ditjen Migas ESDM. ICP: <a href="https://migas.esdm.go.id/post/harga-minyak-mentah" target="_blank" rel="noopener">migas.esdm.go.id/post/harga-minyak-mentah</a>. Produksi: <a href="https://migas.esdm.go.id/page/list-informasi-setiap-saat" target="_blank" rel="noopener">migas.esdm.go.id/page/list-informasi-setiap-saat</a>.</p>
+  <details>
+    <summary>Catatan metode dan data</summary>
+    <ul>
+      <li>Seluruh statistik yang ditampilkan diambil dari notebook proyek. Dashboard tidak mengestimasi ulang model; chart digambar dari dataset Excel proyek dan output forecast notebook.</li>
+      <li>Variabel: ICP (US$/barel) dan produksi minyak mentah plus kondensat nasional (BOPD), bulanan, Januari 2016 sampai Desember 2024, 108 observasi.</li>
+      <li>Model baseline: ΔProduksi(t) = β0 + β1 ΔProduksi(t−1) + β2 ΔProduksi(t−2). Model ICP menambahkan β3 ΔICP(t−6).</li>
+      <li>Validasi forecast: expanding window, satu langkah ke depan, jendela bersama Okt 2021 sampai Des 2024 (39 forecast). Akurasi diukur dengan MAE dan RMSE; perbandingan model nested dengan uji Clark–West, dengan robustness HAC (Newey–West) pada lag 1, 3, dan 6.</li>
+      <li>Tiga belas lag (0 sampai 12) diperiksa pada tahap cross-correlation, sehingga lag 6 adalah lag kandidat yang kemudian diperiksa secara out-of-sample. Chart sensitivitas lag mengulang forecast untuk lag 1 sampai 12.</li>
+      <li>Baseline pada sensitivitas lag: chart memakai baseline final (MAE 8.570,46; RMSE 10.798,69) agar lag 6 sesuai dengan tabel hasil akhir. Satu sel notebook yang lain mencetak baseline 8.606,78 / 10.833,65 untuk perbandingan sensitivitas; selisihnya berasal dari sampel training yang dipakai untuk baseline tersebut.</li>
+      <li>Rujukan sumber historis disusun berdasarkan publikasi resmi Direktorat Jenderal Minyak dan Gas Bumi, Kementerian ESDM.</li>
+      <li>Hasil bersifat spesifik pada sampel, model, dan periode ini.</li>
+    </ul>
+  </details>
+</footer>
+
+</div>
+<div id="tip" role="tooltip"></div>
+
+<script>
+const DATA={"master":[["2016-01",27.49,819083],["2016-02",28.92,839516],["2016-03",34.19,846687],["2016-04",37.2,821449],["2016-05",44.68,841307],["2016-06",44.5,839244],["2016-07",40.7,831437],["2016-08",41.11,832139],["2016-09",42.17,833182],["2016-10",46.64,833762],["2016-11",43.25,825433],["2016-12",51.09,809849],["2017-01",51.88,823225],["2017-02",52.5,806938],["2017-03",48.71,815140],["2017-04",49.56,809439],["2017-05",47.09,793081],["2017-06",43.66,803498],["2017-07",45.48,798773],["2017-08",48.43,807321],["2017-09",52.47,790942],["2017-10",54.02,787931],["2017-11",59.34,789756],["2017-12",60.9,786477],["2018-01",65.59,768505],["2018-02",61.61,787446],["2018-03",61.87,779950],["2018-04",67.43,776177],["2018-05",72.46,779941],["2018-06",70.36,782470],["2018-07",70.68,733143],["2018-08",69.36,777751],["2018-09",74.88,778925],["2018-10",77.56,770893],["2018-11",62.98,761801],["2018-12",54.81,770360],["2019-01",56.55,767799],["2019-02",61.31,766087],["2019-03",63.6,758995],["2019-04",68.31,752936],["2019-05",68.07,752504],["2019-06",61.0,754411],["2019-07",61.32,745702],["2019-08",57.27,729209],["2019-09",60.84,729090],["2019-10",59.82,719618],["2019-11",63.26,731373],["2019-12",67.18,735565],["2020-01",65.38,728632],["2020-02",56.61,728405],["2020-03",34.23,720247],["2020-04",20.66,707529],["2020-05",25.67,709161],["2020-06",36.68,705540],["2020-07",40.64,707869],["2020-08",41.63,657059],["2020-09",37.43,707102],["2020-10",38.07,704675],["2020-11",40.67,696412],["2020-12",47.78,708325],["2021-01",53.17,686738],["2021-02",60.36,678318],["2021-03",63.5,675793],["2021-04",61.96,658316],["2021-05",65.49,648288],["2021-06",70.23,653433],["2021-07",72.17,657057],["2021-08",67.8,660670],["2021-09",72.2,643943],["2021-10",81.8,643822],["2021-11",80.13,645165],["2021-12",73.36,651782],["2022-01",85.89,615915],["2022-02",95.72,626209],["2022-03",113.5,627522],["2022-04",102.51,606322],["2022-05",109.61,606599],["2022-06",117.62,619025],["2022-07",106.73,613254],["2022-08",94.17,609815],["2022-09",86.07,592870],["2022-10",89.1,603317],["2022-11",87.5,619650],["2022-12",76.66,609470],["2023-01",78.54,617948],["2023-02",79.48,624294],["2023-03",74.59,621825],["2023-04",79.34,613889],["2023-05",70.12,613678],["2023-06",69.36,611401],["2023-07",75.06,602830],["2023-08",82.59,603964],["2023-09",90.17,592852],["2023-10",86.72,586880],["2023-11",79.63,586045],["2023-12",75.51,594269],["2024-01",77.12,578108],["2024-02",80.09,575919],["2024-03",83.78,570428],["2024-04",87.61,580825],["2024-05",79.78,581256],["2024-06",79.31,581670],["2024-07",82.0,582196],["2024-08",78.51,576612],["2024-09",72.54,566581],["2024-10",73.53,576461],["2024-11",71.83,593071],["2024-12",71.61,598361]],"ccf":[{"lag":0,"r":0.009411,"p":0.92336,"n":107},{"lag":1,"r":0.034911,"p":0.722385,"n":106},{"lag":2,"r":-0.16536,"p":0.091839,"n":105},{"lag":3,"r":-0.043117,"p":0.663852,"n":104},{"lag":4,"r":0.141025,"p":0.155348,"n":103},{"lag":5,"r":0.107877,"p":0.280484,"n":102},{"lag":6,"r":-0.299932,"p":0.00231,"n":101},{"lag":7,"r":-0.061744,"p":0.541689,"n":100},{"lag":8,"r":0.112544,"p":0.267386,"n":99},{"lag":9,"r":0.077056,"p":0.450759,"n":98},{"lag":10,"r":0.11178,"p":0.27569,"n":97},{"lag":11,"r":-0.120028,"p":0.244083,"n":96},{"lag":12,"r":0.077698,"p":0.454211,"n":95}],"sens":[{"lag":1,"n":39,"mae":8896.735721,"rmse":10978.683661},{"lag":2,"n":39,"mae":8601.991471,"rmse":10782.82489},{"lag":3,"n":39,"mae":8491.05247,"rmse":10560.956993},{"lag":4,"n":39,"mae":8740.340019,"rmse":11186.269414},{"lag":5,"n":39,"mae":8963.001886,"rmse":11265.457585},{"lag":6,"n":39,"mae":8046.735294,"rmse":10115.733211},{"lag":7,"n":39,"mae":8292.804024,"rmse":10512.806008},{"lag":8,"n":39,"mae":8836.16175,"rmse":11288.788162},{"lag":9,"n":39,"mae":8436.415156,"rmse":10615.704066},{"lag":10,"n":39,"mae":8147.048227,"rmse":10458.953883},{"lag":11,"n":39,"mae":8695.481521,"rmse":10892.226426},{"lag":12,"n":39,"mae":8633.167341,"rmse":10941.17409}],"fc":[{"date":"2021-10","actual":-121.0,"base":3539.451556,"icp":4049.04927},{"date":"2021-11","actual":1343.0,"base":-74.215304,"icp":-1401.891809},{"date":"2021-12","actual":6617.0,"base":-6734.140723,"icp":-7767.961014},{"date":"2022-01","actual":-35867.0,"base":-10295.885574,"icp":-10270.955844},{"date":"2022-02","actual":10294.0,"base":14896.759593,"icp":15742.906277},{"date":"2022-03","actual":1313.0,"base":37.827487,"icp":-1607.774762},{"date":"2022-04","actual":-21200.0,"base":-10795.189003,"icp":-12633.601796},{"date":"2022-05","actual":277.0,"base":6924.485192,"icp":7226.05117},{"date":"2022-06","actual":12426.0,"base":1242.055001,"icp":2925.651087},{"date":"2022-07","actual":-5771.0,"base":-14584.181889,"icp":-17632.315349},{"date":"2022-08","actual":-3439.0,"base":-7273.945203,"icp":-9174.441674},{"date":"2022-09","actual":-16945.0,"base":-1791.31034,"icp":-5893.925189},{"date":"2022-10","actual":10447.0,"base":5690.886587,"icp":8989.231516},{"date":"2022-11","actual":16333.0,"base":-6618.078423,"icp":-8599.905395},{"date":"2022-12","actual":-10180.0,"base":-20301.176091,"icp":-20953.322853},{"date":"2023-01","actual":8478.0,"base":-5656.114713,"icp":-2188.106365},{"date":"2023-02","actual":6346.0,"base":-7056.980748,"icp":-2687.92912},{"date":"2023-03","actual":-2469.0,"base":-12177.25596,"icp":-8151.373875},{"date":"2023-04","actual":-7936.0,"base":-5917.3023,"icp":-6388.95716},{"date":"2023-05","actual":-211.0,"base":335.713694,"icp":985.416645},{"date":"2023-06","actual":-2277.0,"base":-2319.707593,"icp":1858.121739},{"date":"2023-07","actual":-8571.0,"base":-3790.814841,"icp":-4127.431034},{"date":"2023-08","actual":1134.0,"base":581.532131,"icp":228.901079},{"date":"2023-09","actual":-11112.0,"base":-2937.763938,"icp":-1047.347794},{"date":"2023-10","actual":-5972.0,"base":818.325254,"icp":-797.418424},{"date":"2023-11","actual":-835.0,"base":1940.481399,"icp":4886.720533},{"date":"2023-12","actual":8224.0,"base":-2894.056045,"icp":-2524.479498},{"date":"2024-01","actual":-16161.0,"base":-9847.346927,"icp":-11072.44117},{"date":"2024-02","actual":-2189.0,"base":1257.919018,"icp":-1242.99047},{"date":"2024-03","actual":-5491.0,"base":1509.956357,"icp":-1442.087294},{"date":"2024-04","actual":10397.0,"base":-1527.473076,"icp":-146.378988},{"date":"2024-05","actual":431.0,"base":-9600.307887,"icp":-6317.487726},{"date":"2024-06","actual":414.0,"base":-9056.067972,"icp":-6545.489684},{"date":"2024-07","actual":526.0,"base":-5482.704455,"icp":-5650.785078},{"date":"2024-08","actual":-5584.0,"base":-5466.985788,"icp":-6164.821426},{"date":"2024-09","actual":-10031.0,"base":-2009.577971,"icp":-3234.007421},{"date":"2024-10","actual":9880.0,"base":2474.540486,"icp":730.706863},{"date":"2024-11","actual":16610.0,"base":-7379.983472,"icp":-3899.997543},{"date":"2024-12","actual":5290.0,"base":-17439.602463,"icp":-15571.602795}]};
+const NB={"avgICP":64.866852,"avgProd":701498.814815,"lag6":{"r":-0.299932,"p":0.00231,"n":101},"base":{"mae":8570.463223,"rmse":10798.692869},"icp":{"mae":8046.735294,"rmse":10115.733211},"impMAE":6.110847,"impRMSE":6.324466,"better":[20,19],"cw":{"stat":2.412527,"p":0.007921,"hac":[[1,2.210915,0.016567],[3,2.432893,0.009898],[6,2.492493,0.008581]]},"lbCW":[[1,0.149795],[3,0.1255],[6,0.34884]],"lbRes":[[1,0.541793],[2,0.755395],[3,0.752327],[6,0.913227],[12,0.99406]],"bp":{"lm":0.698637,"f":0.707933},"ols":{"coef":-460.426221,"se":192.119152,"p":0.018466,"ci":[-841.73,-79.123]},"hc3":{"se":240.152414,"p":0.058152,"ci":[-937.062,16.21]},"sub":[["Okt 2021\u2013Des 2022",15,9582.951999,9739.550276,-1.634134],["2023",12,6170.35185,5776.591024,6.381497],["2024",12,9704.963627,8200.860835,15.498284]],"corr":{"pearson":-0.7008,"spearman":-0.7477},"annual":{"2016":{"icp":40.16,"prod":831090.67},"2017":{"icp":51.17,"prod":801043.42},"2018":{"icp":67.47,"prod":772280.17},"2019":{"icp":62.38,"prod":745274.08},"2020":{"icp":40.45,"prod":706746.33},"2021":{"icp":68.51,"prod":658610.42},"2022":{"icp":97.09,"prod":612497.33},"2023":{"icp":78.43,"prod":605822.92},"2024":{"icp":78.14,"prod":580124.0}}};
+
+/* ---------- helpers ---------- */
+const MON=['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agu','Sep','Okt','Nov','Des'];
+const $=id=>document.getElementById(id);
+const fmt=(n,d=0)=>Number(n).toLocaleString('en-US',{minimumFractionDigits:d,maximumFractionDigits:d}).replace(/[.,]/g,c=>c===','?'.':',');
+const dec=(v,d)=>v.toFixed(d).replace('.',',');
+const fmtS=(n,d=0)=>(n<0?'\u2212':'')+fmt(Math.abs(n),d);
+const dLabel=s=>{const [y,m]=s.split('-');return MON[+m-1]+' '+y;};
+const esc=s=>String(s).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+const lin=(d0,d1,r0,r1)=>v=>r0+(v-d0)*(r1-r0)/((d1-d0)||1);
+function niceTicks(min,max,count){
+  const span=(max-min)||1,raw=span/count,mag=Math.pow(10,Math.floor(Math.log10(raw))),nr=raw/mag;
+  const step=(nr<1.5?1:nr<3?2:nr<7?5:10)*mag;
+  const lo=Math.floor(min/step+1e-9)*step,hi=Math.ceil(max/step-1e-9)*step,t=[];
+  for(let v=lo;v<=hi+step*0.001;v+=step)t.push(+v.toFixed(10));
+  return {ticks:t,lo,hi,step};
+}
+function frame(el,H,m){const W=Math.max(280,Math.round(el.clientWidth||600));return {W,H,m,iw:W-m.l-m.r,ih:H-m.t-m.b};}
+const svgOpen=f=>`<svg viewBox="0 0 ${f.W} ${f.H}" width="${f.W}" height="${f.H}" role="img" aria-label="">`;
+
+/* tooltip */
+const tip=$('tip');
+function showTip(html,e){
+  tip.innerHTML=html;tip.style.display='block';
+  const w=tip.offsetWidth,h=tip.offsetHeight;let x=e.clientX+14,y=e.clientY+14;
+  if(x+w>window.innerWidth-8)x=e.clientX-w-14;
+  if(y+h>window.innerHeight-8)y=e.clientY-h-14;
+  tip.style.left=Math.max(4,x)+'px';tip.style.top=Math.max(4,y)+'px';
+}
+function hideTip(){tip.style.display='none';}
+document.addEventListener('pointerover',e=>{const t=e.target.closest&&e.target.closest('[data-tip]');if(t)showTip(t.getAttribute('data-tip'),e);});
+document.addEventListener('pointermove',e=>{const t=e.target.closest&&e.target.closest('[data-tip]');if(t)showTip(t.getAttribute('data-tip'),e);});
+document.addEventListener('pointerout',e=>{const t=e.target.closest&&e.target.closest('[data-tip]');if(t)hideTip();});
+
+/* ---------- data ---------- */
+const M=DATA.master.map(([d,i,p])=>({d,icp:i,prod:p}));
+const N=M.length;
+const dI=[],dP=[];
+for(let i=1;i<N;i++){dI.push(+(M[i].icp-M[i-1].icp).toFixed(2));dP.push(M[i].prod-M[i-1].prod);}
+const CCF=DATA.ccf,SENS=DATA.sens,FC=DATA.fc;
+const C={prod:'#1D5C78',icp:'#C47A12',base:'#6F7D88',soft:'#A8B3BC',ink:'#15232D'};
+
+/* consistency checks against notebook values (console only) */
+(function(){
+  const mean=a=>a.reduce((s,v)=>s+v,0)/a.length;
+  const chk=(n,a,b,tol)=>{if(Math.abs(a-b)>tol)console.warn('Mismatch',n,a,b);};
+  chk('avgICP',mean(M.map(r=>r.icp)),NB.avgICP,1e-3);
+  chk('avgProd',mean(M.map(r=>r.prod)),NB.avgProd,1e-2);
+  const ae=k=>mean(FC.map(r=>Math.abs(r.actual-r[k])));
+  chk('MAE base',ae('base'),NB.base.mae,1e-2);chk('MAE icp',ae('icp'),NB.icp.mae,1e-2);
+})();
+
+/* ---------- generic time-series chart ---------- */
+function xyChart(el,cfg){
+  const H=cfg.height||260,m=Object.assign({l:62,r:14,t:12,b:28},cfg.margin||{});
+  const f=frame(el,H,m),n=cfg.labels.length,bar=cfg.type==='bar';
+  const vis=cfg.series.filter(s=>s.visible!==false);
+  let vals=[];vis.forEach(s=>s.values.forEach(v=>vals.push(v)));
+  let lo=Math.min(...vals),hi=Math.max(...vals);
+  if(bar||cfg.zero){lo=Math.min(lo,0);hi=Math.max(hi,0);}
+  if(!bar){const p=(hi-lo)*0.05;lo-=p;hi+=p;}
+  const nt=niceTicks(lo,hi,cfg.yTicks||4);
+  const Y=lin(nt.lo,nt.hi,m.t+f.ih,m.t);
+  const X=i=>bar?m.l+(i+0.5)*f.iw/n:m.l+(n>1?i*f.iw/(n-1):f.iw/2);
+  let s=svgOpen(f).replace('aria-label=""',`aria-label="${esc(cfg.aria||'')}"`);
+  nt.ticks.forEach(t=>{const yy=Y(t).toFixed(1);
+    s+=`<line class="grid${t===0?' zero':''}" x1="${m.l}" x2="${m.l+f.iw}" y1="${yy}" y2="${yy}"/><text class="tk" x="${m.l-8}" y="${(+yy+4).toFixed(1)}" text-anchor="end">${cfg.yFmt(t)}</text>`;});
+  for(let i=0;i<n;i++){if(cfg.xTick(cfg.labels[i],i))s+=`<text class="tk" x="${X(i).toFixed(1)}" y="${m.t+f.ih+18}" text-anchor="middle">${cfg.xLabel(cfg.labels[i])}</text>`;}
+  vis.forEach(sr=>{
+    if(bar){const bw=Math.max(1,f.iw/n*0.72),y0=Y(0);
+      sr.values.forEach((v,i)=>{const y1=Y(v);s+=`<rect x="${(X(i)-bw/2).toFixed(1)}" y="${Math.min(y0,y1).toFixed(1)}" width="${bw.toFixed(1)}" height="${Math.abs(y1-y0).toFixed(1)}" fill="${sr.color}" opacity=".88"/>`;});
+    }else{
+      let d='';sr.values.forEach((v,i)=>{d+=(i?'L':'M')+X(i).toFixed(1)+' '+Y(v).toFixed(1);});
+      s+=`<path d="${d}" fill="none" stroke="${sr.color}" stroke-width="${sr.width||1.8}"${sr.dash?` stroke-dasharray="${sr.dash}"`:''} stroke-linejoin="round" stroke-linecap="round"/>`;
+    }
+  });
+  s+=`<line class="xh" x1="0" x2="0" y1="${m.t}" y2="${m.t+f.ih}"/>`;
+  if(!bar)vis.forEach(sr=>{s+=`<circle class="hd" r="4" fill="${sr.color}"/>`;});
+  s+=`<rect class="hit" x="${m.l}" y="${m.t}" width="${f.iw}" height="${f.ih}"/></svg>`;
+  el.innerHTML=s;
+  const svg=el.querySelector('svg'),hit=el.querySelector('.hit'),xh=el.querySelector('.xh');
+  if(!hit||!svg)return;
+  const dots=Array.from(el.querySelectorAll('.hd'));
+  hit.addEventListener('pointermove',e=>{
+    const r=svg.getBoundingClientRect(),mx=(e.clientX-r.left)*(f.W/r.width);
+    let i=bar?Math.floor((mx-m.l)/(f.iw/n)):Math.round((mx-m.l)/(f.iw/Math.max(1,n-1)));
+    i=Math.max(0,Math.min(n-1,i));
+    xh.setAttribute('x1',X(i));xh.setAttribute('x2',X(i));xh.style.display='block';
+    dots.forEach((d,k)=>{d.setAttribute('cx',X(i));d.setAttribute('cy',Y(vis[k].values[i]));d.style.display='block';});
+    showTip(cfg.tip(i,vis),e);
+  });
+  hit.addEventListener('pointerleave',()=>{xh.style.display='none';dots.forEach(d=>d.style.display='none');hideTip();});
+}
+const janTick=l=>l.endsWith('-01');
+const yearLbl=l=>l.slice(0,4);
+
+/* ---------- KPI ---------- */
+function renderKPI(){
+  const k=[
+    {l:'Rata-rata ICP',v:fmt(NB.avgICP,2),u:'US$/bbl',s:'Rata-rata bulanan, Jan 2016 sampai Des 2024'},
+    {l:'Rata-rata produksi',v:fmt(NB.avgProd,0),u:'BOPD',s:'Minyak mentah dan kondensat, rata-rata bulanan'},
+    {l:'Lag terkuat yang diuji',v:'Lag 6',u:'bulan',s:'ΔICP dengan ΔProduksi: r = '+fmtS(NB.lag6.r,3)+', p = '+dec(NB.lag6.p,4),hl:1},
+    {l:'Peningkatan akurasi peramalan',v:fmt(NB.impMAE,2)+'%',u:'MAE lebih rendah',s:'ICP Lag 6 vs baseline, Okt 2021 sampai Des 2024. RMSE: '+fmt(NB.impRMSE,2)+'% lebih rendah',hl:1}
+  ];
+  $('kpis').innerHTML=k.map(x=>`<div class="kpi${x.hl?' hl':''}"><div class="kl">${x.l}</div><div class="kv">${x.v}<small>${x.u}</small></div><div class="ks">${x.s}</div></div>`).join('');
+}
+
+/* ---------- section 2 ---------- */
+const RANGES=[['Semua',0,N-1],['2016–18',0,35],['2019–21',36,71],['2022–24',72,107]];
+let rangeIdx=0;
+function renderRangeSeg(){
+  $('rangeSeg').innerHTML=RANGES.map((r,i)=>`<button type="button" data-i="${i}" aria-pressed="${i===rangeIdx}">${r[0]}</button>`).join('');
+  $('rangeSeg').querySelectorAll('button').forEach(b=>b.addEventListener('click',()=>{rangeIdx=+b.dataset.i;renderRangeSeg();renderTS();}));
+}
+function renderTS(){
+  const [,a,b]=RANGES[rangeIdx],sl=M.slice(a,b+1),labels=sl.map(r=>r.d);
+  xyChart($('c-icp'),{height:260,labels,type:'line',series:[{name:'ICP',color:C.icp,values:sl.map(r=>r.icp)}],
+    yFmt:v=>fmt(v,0),xTick:janTick,xLabel:yearLbl,aria:'Grafik garis ICP bulanan dalam US dolar per barel',
+    tip:(i,v)=>`${dLabel(labels[i])}<br>ICP <b>US$${fmt(v[0].values[i],2)}</b>/bbl`});
+  xyChart($('c-prod'),{height:260,labels,type:'line',series:[{name:'Production',color:C.prod,values:sl.map(r=>r.prod)}],
+    yFmt:v=>fmt(v,0),xTick:janTick,xLabel:yearLbl,aria:'Grafik garis produksi minyak nasional bulanan dalam barel per hari',
+    tip:(i,v)=>`${dLabel(labels[i])}<br>Produksi <b>${fmt(v[0].values[i])}</b> BOPD`});
+}
+
+/* ---------- section 3 ---------- */
+let scatLag=0;
+function renderChg(){
+  const labels=M.slice(1).map(r=>r.d);
+  xyChart($('c-dicp'),{height:150,labels,type:'bar',series:[{color:C.icp,values:dI}],yTicks:3,margin:{t:8},
+    yFmt:v=>fmtS(v,0),xTick:janTick,xLabel:yearLbl,aria:'Grafik batang perubahan bulanan ICP',
+    tip:(i,v)=>`${dLabel(labels[i])}<br>ΔICP <b>${fmtS(dI[i],2)}</b> US$/bbl`});
+  xyChart($('c-dprod'),{height:150,labels,type:'bar',series:[{color:C.prod,values:dP}],yTicks:3,margin:{t:8},
+    yFmt:v=>fmtS(v,0),xTick:janTick,xLabel:yearLbl,aria:'Grafik batang perubahan bulanan produksi',
+    tip:(i,v)=>`${dLabel(labels[i])}<br>ΔProduksi <b>${fmtS(dP[i])}</b> BOPD`});
+  renderScatter();
+}
+function renderScatSeg(){
+  $('scatSeg').innerHTML=[[0,'Bulan yang sama'],[6,'ICP 6 bulan sebelumnya']].map(([l,t])=>`<button type="button" data-l="${l}" aria-pressed="${l===scatLag}">${t}</button>`).join('');
+  $('scatSeg').querySelectorAll('button').forEach(b=>b.addEventListener('click',()=>{scatLag=+b.dataset.l;renderScatSeg();renderScatter();}));
+}
+function renderScatter(){
+  const el=$('c-scat'),lag=scatLag,H=340,m={l:80,r:14,t:10,b:44},f=frame(el,H,m);
+  const xs=dI.slice(0,dI.length-lag),ys=dP.slice(lag);
+  const tx=niceTicks(Math.min(...xs),Math.max(...xs),5),ty=niceTicks(Math.min(...ys),Math.max(...ys),5);
+  const X=lin(tx.lo,tx.hi,m.l,m.l+f.iw),Y=lin(ty.lo,ty.hi,m.t+f.ih,m.t);
+  let s=svgOpen(f).replace('aria-label=""',`aria-label="Scatter plot perubahan ICP terhadap perubahan produksi, lag ${lag}"`);
+  ty.ticks.forEach(t=>{const yy=Y(t).toFixed(1);s+=`<line class="grid${t===0?' zero':''}" x1="${m.l}" x2="${m.l+f.iw}" y1="${yy}" y2="${yy}"/><text class="tk" x="${m.l-8}" y="${(+yy+4).toFixed(1)}" text-anchor="end">${fmtS(t)}</text>`;});
+  tx.ticks.forEach(t=>{const xx=X(t).toFixed(1);s+=`<line class="grid${t===0?' zero':''}" y1="${m.t}" y2="${m.t+f.ih}" x1="${xx}" x2="${xx}"/><text class="tk" x="${xx}" y="${m.t+f.ih+16}" text-anchor="middle">${fmtS(t)}</text>`;});
+  const col=lag===6?C.icp:C.base;
+  xs.forEach((x,j)=>{
+    const dIc=M[j+1].d,dPc=M[j+lag+1].d;
+    const tp=lag===0?`${dLabel(dPc)}<br>ΔICP <b>${fmtS(x,2)}</b> US$/bbl<br>ΔProduksi <b>${fmtS(ys[j])}</b> BOPD`:`ΔICP pada ${dLabel(dIc)}: <b>${fmtS(x,2)}</b><br>ΔProduksi pada ${dLabel(dPc)}: <b>${fmtS(ys[j])}</b>`;
+    s+=`<circle cx="${X(x).toFixed(1)}" cy="${Y(ys[j]).toFixed(1)}" r="4" fill="${col}" fill-opacity=".55" stroke="${col}" stroke-width="1" data-tip="${esc(tp)}"/>`;
+  });
+  s+=`<text class="axt" x="${m.l+f.iw/2}" y="${H-4}" text-anchor="middle">ΔICP${lag?'(t−'+lag+')':''} (US$/bbl)</text>`;
+  s+=`<text class="axt" transform="translate(12 ${m.t+f.ih/2}) rotate(-90)" text-anchor="middle">ΔProduksi(t) (BOPD)</text></svg>`;
+  el.innerHTML=s;
+  const c=CCF.find(r=>r.lag===lag);
+  $('scatFoot').innerHTML=`Lag ${lag}: r = <b>${fmtS(c.r,3)}</b>, p = ${dec(c.p,4)}, n = ${c.n} (hasil notebook).`+(lag===0?' Belum tampak pola pada bulan yang sama.':' Hanya hubungan antar perubahan bulanan.');
+}
+
+/* ---------- section 4: lead-lag ---------- */
+function renderLead(){
+  const el=$('c-lead'),H=350,m={l:54,r:14,t:16,b:52},f=frame(el,H,m);
+  const lo=-0.35,hi=0.2,Y=lin(lo,hi,m.t+f.ih,m.t),band=f.iw/CCF.length,bw=band*0.58;
+  const X=i=>m.l+(i+0.5)*band;
+  let s=svgOpen(f).replace('aria-label=""','aria-label="Grafik batang cross-correlation antara perubahan ICP dan perubahan produksi untuk lag 0 sampai 12"');
+  [-0.3,-0.2,-0.1,0,0.1,0.2].forEach(t=>{const yy=Y(t).toFixed(1);s+=`<line class="grid${t===0?' zero':''}" x1="${m.l}" x2="${m.l+f.iw}" y1="${yy}" y2="${yy}"/><text class="tk" x="${m.l-8}" y="${(+yy+4).toFixed(1)}" text-anchor="end">${fmtS(t,1)}</text>`;});
+  CCF.forEach((c,i)=>{
+    const hl=c.lag===6,y0=Y(0),y1=Y(c.r);
+    const tp=`<b>Lag ${c.lag}</b><br>r = ${fmtS(c.r,3)}<br>p = ${dec(c.p,4)}, n = ${c.n}`;
+    s+=`<rect x="${(X(i)-bw/2).toFixed(1)}" y="${Math.min(y0,y1).toFixed(1)}" width="${bw.toFixed(1)}" height="${Math.abs(y1-y0).toFixed(1)}" fill="${hl?C.icp:C.soft}"/>`;
+    s+=`<text class="tk" x="${X(i).toFixed(1)}" y="${m.t+f.ih+17}" text-anchor="middle"${hl?' style="font-weight:700;fill:#8A5309"':''}>${c.lag}</text>`;
+    s+=`<rect x="${(m.l+i*band).toFixed(1)}" y="${m.t}" width="${band.toFixed(1)}" height="${f.ih}" fill="transparent" data-tip="${esc(tp)}"/>`;
+  });
+  const c6=CCF.find(c=>c.lag===6),i6=CCF.indexOf(c6),ye=Y(c6.r);
+  s+=`<text class="lbl" x="${X(i6).toFixed(1)}" y="${(ye+15).toFixed(1)}" text-anchor="middle">${fmtS(c6.r,3)}</text>`;
+  const ax=X(i6)+bw/2+10,ay=Y(-0.225);
+  s+=`<line x1="${(X(i6)+bw/2+2).toFixed(1)}" x2="${ax-3}" y1="${ay-4}" y2="${ay-4}" stroke="${C.icp}" stroke-width="1.5"/>`;
+  s+=`<text class="ann" x="${ax.toFixed(1)}" y="${ay.toFixed(1)}">Hubungan lead-lag</text><text class="ann" x="${ax.toFixed(1)}" y="${(ay+15).toFixed(1)}">terkuat yang diuji</text>`;
+  s+=`<text class="axt" x="${m.l+f.iw/2}" y="${H-6}" text-anchor="middle">Lag ICP k (bulan): ΔICP(t−k) dengan ΔProduksi(t)</text></svg>`;
+  el.innerHTML=s;
+  const c0=CCF.find(c=>c.lag===0);
+  $('leadNote').innerHTML=`<h3>Cara membaca chart ini</h3>
+  <p class="cap">Lag k membandingkan ΔICP k bulan sebelumnya dengan ΔProduksi saat ini.</p>
+  <table><tbody>
+   <tr class="hl"><td>Lag 6</td><td>r = ${fmtS(c6.r,3)}</td><td>p = ${dec(c6.p,4)}</td></tr>
+   <tr><td>Lag 0 (bulan yang sama)</td><td>r = ${fmtS(c0.r,3)}</td><td>p = ${dec(c0.p,4)}</td></tr>
+  </tbody></table>
+  <p class="foot">Lag 6 memiliki korelasi absolut terbesar dari 13 lag yang diuji. Tandanya negatif: ΔICP yang lebih besar enam bulan sebelumnya sejalan dengan ΔProduksi yang lebih kecil. Ini adalah hubungan statistik.</p>
+  <p class="foot">Karena 13 lag diperiksa, lag 6 diperlakukan sebagai kandidat lag utama yang kemudian diuji pada data pengujian (out-of-sample) pada dua bagian berikutnya. Lag 6 adalah lag terbaik yang diuji dalam setup dan periode validasi ini, bukan bukti waktu respons (response time) yang sebenarnya.</p>`;
+}
+
+/* ---------- section 5: forecast ---------- */
+const fcState={actual:true,base:true,icp:true};
+const FCS=[['actual','Aktual',C.ink,null,2.4],['base','Peramalan baseline',C.base,'5 4',1.8],['icp','Peramalan ICP Lag 6',C.icp,null,2]];
+function renderFCLegend(){
+  $('fcLegend').innerHTML=FCS.map(([k,n,c,d])=>`<button type="button" class="lg" data-k="${k}" aria-pressed="${fcState[k]}"><i style="border-top-color:${c};${d?'border-top-style:dashed;':''}"></i>${n}</button>`).join('');
+  $('fcLegend').querySelectorAll('button').forEach(b=>b.addEventListener('click',()=>{
+    const k=b.dataset.k,on=Object.values(fcState).filter(Boolean).length;
+    if(fcState[k]&&on===1)return;fcState[k]=!fcState[k];renderFCLegend();renderFC();}));
+}
+function renderFC(){
+  const labels=FC.map(r=>r.date);
+  const series=FCS.map(([k,n,c,d,w])=>({key:k,name:n,color:c,dash:d,width:w,values:FC.map(r=>r[k]),visible:fcState[k]}));
+  xyChart($('c-fc'),{height:340,labels,type:'line',series,zero:true,yFmt:v=>fmtS(v),xTick:janTick,xLabel:yearLbl,
+    aria:'Grafik garis perubahan produksi aktual dan dua forecast, Oktober 2021 sampai Desember 2024',
+    tip:(i,vis)=>`<b>${dLabel(labels[i])}</b>`+vis.map(s=>`<br>${s.name}: ${fmtS(s.values[i])}`).join('')});
+}
+function renderFCPanel(){
+  const b=NB.base,i=NB.icp;
+  $('fcPanel').innerHTML=`<h3>Akurasi forecast</h3>
+  <p class="cap">Satuan: BOPD. 39 forecast, Okt 2021 sampai Des 2024.</p>
+  <p class="foot" style="margin-top:0">Improvement menunjukkan penurunan error relatif terhadap baseline; semakin besar improvement, semakin kecil error peramalan.</p>
+  <table>
+   <thead><tr><th>Model</th><th>MAE</th><th>RMSE</th></tr></thead>
+   <tbody>
+    <tr><td>Baseline</td><td>${fmt(b.mae,2)}</td><td>${fmt(b.rmse,2)}</td></tr>
+    <tr class="hl"><td>Baseline + ICP Lag 6</td><td>${fmt(i.mae,2)}</td><td>${fmt(i.rmse,2)}</td></tr>
+    <tr class="sum"><td>Perubahan vs baseline</td><td>${fmtS(-NB.impMAE,2)}%</td><td>${fmtS(-NB.impRMSE,2)}%</td></tr>
+   </tbody>
+  </table>
+  <p class="foot">Model ICP memiliki absolute error yang lebih rendah pada <b>${NB.better[0]} dari 39</b> bulan (baseline: ${NB.better[1]}).</p>
+  <div class="mini">
+   <h4>MAE menurut sub-periode</h4>
+   <table><thead><tr><th>Periode</th><th>Baseline</th><th>ICP Lag 6</th><th>Perubahan</th></tr></thead><tbody>
+   ${NB.sub.map(r=>`<tr><td>${r[0]}</td><td>${fmt(r[2])}</td><td>${fmt(r[3])}</td><td>${r[4]>0?'\u2212':'+'}${fmt(Math.abs(r[4]),2)}%</td></tr>`).join('')}
+   </tbody></table>
+   <p class="foot">Perubahan adalah MAE model ICP relatif terhadap baseline; tanda minus berarti error lebih rendah. Peningkatan tidak merata di seluruh jendela.</p>
+  </div>`;
+}
+
+/* ---------- section 6: sensitivity ---------- */
+let sensMetric='mae';
+function renderSensSeg(){
+  $('sensSeg').innerHTML=[['mae','MAE'],['rmse','RMSE']].map(([k,t])=>`<button type="button" data-k="${k}" aria-pressed="${k===sensMetric}">${t}</button>`).join('');
+  $('sensSeg').querySelectorAll('button').forEach(b=>b.addEventListener('click',()=>{sensMetric=b.dataset.k;renderSensSeg();renderSens();}));
+}
+function renderSens(){
+  const el=$('c-sens'),k=sensMetric,K=k.toUpperCase(),H=340,wide=(el.clientWidth||600)>=560,m={l:66,r:wide?112:16,t:16,b:50},f=frame(el,H,m);
+  $('sensTitle').textContent=`${K} forecast satu langkah ke depan menurut lag ICP (BOPD)`;
+  const base=NB.base[k],vals=SENS.map(r=>r[k]);
+  let lo=Math.min(base,...vals),hi=Math.max(base,...vals);const span=hi-lo;
+  lo-=span*0.32;hi+=span*0.08;
+  const nt=niceTicks(lo,hi,5),Y=lin(nt.lo,nt.hi,m.t+f.ih,m.t),band=f.iw/SENS.length,X=i=>m.l+(i+0.5)*band;
+  let s=svgOpen(f).replace('aria-label=""',`aria-label="Grafik titik ${K} forecast menurut lag ICP 1 sampai 12 dibandingkan baseline"`);
+  nt.ticks.forEach(t=>{const yy=Y(t).toFixed(1);s+=`<line class="grid" x1="${m.l}" x2="${m.l+f.iw}" y1="${yy}" y2="${yy}"/><text class="tk" x="${m.l-8}" y="${(+yy+4).toFixed(1)}" text-anchor="end">${fmt(t)}</text>`;});
+  const yb=Y(base);
+  s+=`<line x1="${m.l}" x2="${m.l+f.iw}" y1="${yb.toFixed(1)}" y2="${yb.toFixed(1)}" stroke="${C.base}" stroke-width="1.6" stroke-dasharray="6 4"/>`;
+  if(wide)s+=`<text class="axt" x="${m.l+f.iw+8}" y="${(yb-2).toFixed(1)}">Baseline (final)</text><text class="lbl" x="${m.l+f.iw+8}" y="${(yb+14).toFixed(1)}">${fmt(base,0)}</text>`;
+  else s+=`<text class="axt" x="${m.l+f.iw}" y="${(yb-6).toFixed(1)}" text-anchor="end">Baseline (final): ${fmt(base,0)}</text>`;
+  SENS.forEach((r,i)=>{
+    const hl=r.lag===6,yy=Y(r[k]),d=(base-r[k])/base*100;
+    const tp=`<b>Lag ICP ${r.lag}</b><br>${K} ${fmt(r[k],2)}<br>${d>=0?fmt(d,2)+'% lebih rendah':fmt(-d,2)+'% lebih tinggi'} daripada baseline`;
+    s+=`<line x1="${X(i).toFixed(1)}" x2="${X(i).toFixed(1)}" y1="${yb.toFixed(1)}" y2="${yy.toFixed(1)}" stroke="${hl?C.icp:C.soft}" stroke-width="${hl?3:2}"/>`;
+    s+=`<circle cx="${X(i).toFixed(1)}" cy="${yy.toFixed(1)}" r="${hl?8:5}" fill="${hl?C.icp:'#fff'}" stroke="${hl?C.icp:C.base}" stroke-width="2"/>`;
+    s+=`<text class="tk" x="${X(i).toFixed(1)}" y="${m.t+f.ih+18}" text-anchor="middle"${hl?' style="font-weight:700;fill:#8A5309"':''}>${r.lag}</text>`;
+    s+=`<rect x="${(m.l+i*band).toFixed(1)}" y="${m.t}" width="${band.toFixed(1)}" height="${f.ih}" fill="transparent" data-tip="${esc(tp)}"/>`;
+  });
+  const i6=SENS.findIndex(r=>r.lag===6),y6=Y(SENS[i6][k]);
+  s+=`<text class="lbl" x="${X(i6).toFixed(1)}" y="${(y6+27).toFixed(1)}" text-anchor="middle">${fmt(SENS[i6][k],0)}</text>`;
+  s+=`<text class="ann" x="${X(i6).toFixed(1)}" y="${(y6+44).toFixed(1)}" text-anchor="middle">Lag terbaik yang diuji</text><text class="ann" x="${X(i6).toFixed(1)}" y="${(y6+59).toFixed(1)}" text-anchor="middle">pada periode evaluasi ini</text>`;
+  s+=`<text class="axt" x="${m.l+f.iw/2}" y="${H-6}" text-anchor="middle">Lag ICP (bulan)</text></svg>`;
+  el.innerHTML=s;
+}
+
+/* ---------- section 7: evidence ---------- */
+function renderEvidence(){
+  const p4=v=>dec(v,4);
+  const rows=[
+   ['Uji Clark–West','ok',`Statistik ${fmt(NB.cw.stat,2)}, p-value satu sisi = ${p4(NB.cw.p)}`,'Membandingkan kemampuan peramalan model augmented (dengan ICP Lag 6) terhadap baseline. Memberikan bukti statistik bahwa model dengan ICP Lag 6 menunjukkan peningkatan kinerja peramalan dibandingkan baseline pada periode evaluasi.'],
+   ['HAC (galat baku robust)','ok',`p = ${NB.cw.hac.map(h=>p4(h[2])).join(' / ')} untuk lag HAC ${NB.cw.hac.map(h=>h[0]).join(' / ')}`,'Pemeriksaan ketahanan (robustness check) hasil Clark–West terhadap galat baku (standard error) Newey–West. Hasil tetap konsisten; Ljung–Box pada loss Clark–West tidak menunjukkan bukti autokorelasi (p = '+NB.lbCW.map(h=>fmt(h[1],2)).join(', ')+').'],
+   ['HC3 (galat baku robust koefisien)','c',`Koefisien ICP Lag 6: p OLS = ${dec(NB.ols.p,3)}, p HC3 = ${dec(NB.hc3.p,3)}`,'Pemeriksaan ketahanan (robustness check) galat baku (standard error) pada koefisien. Signifikansi koefisien lebih sensitif terhadap standard error robust, sehingga bukti pada level koefisien ini lebih lemah dibandingkan bukti dari validasi forecast di atas.'],
+   ['Ljung–Box (autokorelasi residual)','ok',`p dari ${fmt(Math.min(...NB.lbRes.map(r=>r[1])),2)} sampai ${fmt(Math.max(...NB.lbRes.map(r=>r[1])),2)} (lag 1, 2, 3, 6, 12)`,'Memeriksa autokorelasi (autocorrelation) pada residual model final. Tidak ditemukan bukti autokorelasi.'],
+   ['Breusch–Pagan (heteroskedastisitas)','ok',`LM p = ${fmt(NB.bp.lm,3)}`,'Memeriksa indikasi heteroskedastisitas (heteroskedasticity) pada residual model final. Tidak ditemukan indikasi heteroskedastisitas.']
+  ];
+  $('evTable').innerHTML='<tbody>'+rows.map(r=>`<tr${r[1]==='c'?' class="caut"':''}><td>${r[0]}</td><td><span class="dot${r[1]==='c'?' c':''}"></span>${r[2]}</td><td>${r[3]}</td></tr>`).join('')+'</tbody>';
+  $('hc3Note').innerHTML=`<b>Catatan HC3.</b> Koefisien bernilai sekitar ${fmtS(NB.ols.coef,0)} BOPD per perubahan 1 US$/bbl pada ΔICP(t−6). p-value OLS ≈ ${dec(NB.ols.p,3)}, tetapi p-value HC3 (galat baku robust) ≈ ${dec(NB.hc3.p,3)} dan intervalnya mencapai nol. Signifikansi koefisien ini lebih sensitif terhadap metode standard error dibandingkan hasil validasi forecast, sehingga bukti pada level koefisien lebih lemah dan tidak dipakai sebagai bukti hubungan struktural maupun kausal.`;
+}
+function renderCI(){
+  const el=$('c-ci'),H=190,m={l:78,r:78,t:16,b:44},f=frame(el,H,m);
+  const lo=-1000,hi=100,X=lin(lo,hi,m.l,m.l+f.iw);
+  const rows=[['SE OLS',NB.ols,C.icp],['SE HC3',NB.hc3,C.icp]];
+  let s=svgOpen(f).replace('aria-label=""','aria-label="Confidence interval koefisien ICP lag 6 dengan standard error OLS dan HC3"');
+  [-1000,-800,-600,-400,-200,0].forEach(t=>{const xx=X(t).toFixed(1);s+=`<line class="grid${t===0?' zero':''}" x1="${xx}" x2="${xx}" y1="${m.t}" y2="${m.t+f.ih}"${t===0?' stroke-dasharray="4 3"':''}/><text class="tk" x="${xx}" y="${m.t+f.ih+16}" text-anchor="middle">${fmtS(t)}</text>`;});
+  rows.forEach(([n,o,c],i)=>{
+    const yy=m.t+f.ih*(i+0.5)/2,ci=o.ci;
+    const tp=`<b>${n}</b><br>Koefisien ${fmtS(NB.ols.coef,1)}<br>CI 95% ${fmtS(ci[0],1)} sampai ${fmtS(ci[1],1)}<br>p = ${dec(o.p,3)}`;
+    s+=`<text class="lbl" x="${m.l-10}" y="${(yy+4).toFixed(1)}" text-anchor="end">${n}</text>`;
+    s+=`<line x1="${X(ci[0]).toFixed(1)}" x2="${X(ci[1]).toFixed(1)}" y1="${yy.toFixed(1)}" y2="${yy.toFixed(1)}" stroke="${c}" stroke-width="3" stroke-linecap="round"/>`;
+    s+=`<circle cx="${X(NB.ols.coef).toFixed(1)}" cy="${yy.toFixed(1)}" r="6" fill="${c}" stroke="#fff" stroke-width="1.5"/>`;
+    s+=`<text class="tk" x="${m.l+f.iw+10}" y="${(yy+4).toFixed(1)}">p = ${dec(o.p,3)}</text>`;
+    s+=`<rect x="${m.l}" y="${(yy-22).toFixed(1)}" width="${f.iw}" height="44" fill="transparent" data-tip="${esc(tp)}"/>`;
+  });
+  s+=`<text class="axt" x="${m.l+f.iw/2}" y="${H-4}" text-anchor="middle">Koefisien (BOPD per US$/bbl)</text></svg>`;
+  el.innerHTML=s;
+}
+
+/* ---------- section 8: insights ---------- */
+function renderInsights(){
+  const a=NB.annual,ins=[
+   ['Produksi minyak cenderung menurun sepanjang 2016–2024',
+    `Rata-rata produksi tahunan turun setiap tahun, dari ${fmt(a['2016'].prod)} BOPD pada 2016 menjadi ${fmt(a['2024'].prod)} BOPD pada 2024. Pada tahun-tahun yang sama, rata-rata ICP tahunan bergerak dari US$${fmt(a['2016'].icp,2)} (2016) hingga US$${fmt(a['2022'].icp,2)} (2022), dan berada di US$${fmt(a['2024'].icp,2)} pada 2024.`,0],
+   ['Hubungan pada level hanya bersifat eksploratif',
+    `Pada level, ICP dan produksi memiliki korelasi Pearson ${fmtS(NB.corr.pearson,2)} dan korelasi Spearman ${fmtS(NB.corr.spearman,2)}. Kedua deret level non-stasioner pada uji ADF, sehingga temuan ini hanya diperlakukan sebagai temuan eksploratif dan analisis dilanjutkan pada perubahan bulanan.`,0],
+   ['Model dengan ICP Lag 6 memberikan tambahan informasi prediktif (predictive information)',
+    `Model dengan ICP Lag 6 menurunkan MAE sekitar ${fmt(NB.impMAE,2)}% dan RMSE sekitar ${fmt(NB.impRMSE,2)}% dibandingkan baseline pada periode evaluasi Okt 2021–Des 2024. p-value Clark–West adalah ${dec(NB.cw.p,4)} dan tetap di bawah 0,02 dengan galat baku (standard error) HAC. Peningkatan ini tidak merata: model ICP memiliki absolute error lebih rendah pada ${NB.better[0]} dari 39 bulan, dan sedikit lebih buruk pada periode 2021–2022, sehingga model ini tidak selalu lebih akurat pada setiap periode.`,1],
+   ['Hasil bersifat spesifik pada sampel, model, dan periode ini (bukan bukti kausal)',
+    `Koefisien ICP Lag 6 memiliki p-value OLS ≈ ${dec(NB.ols.p,3)} tetapi p-value HC3 ≈ ${dec(NB.hc3.p,3)}, dan lag 6 dipilih dari data yang sama. Hasil ini menunjukkan adanya tambahan informasi prediktif (predictive information) dalam setup model yang diuji, berupa hubungan statistik (statistical association); hasil ini tidak membuktikan hubungan kausal antara ICP dan produksi minyak Indonesia, dan tidak menjamin performa yang sama pada data atau periode lain.`,1]
+  ];
+  $('ins').innerHTML=ins.map(r=>`<article${r[2]?' class="c"':''}><h3>${r[0]}</h3><p>${r[1]}</p></article>`).join('');
+}
+
+/* ---------- boot ---------- */
+function renderAll(){renderTS();renderChg();renderLead();renderFC();renderSens();renderCI();}
+function init(){
+  renderKPI();renderRangeSeg();renderScatSeg();renderFCLegend();renderSensSeg();
+  renderFCPanel();renderEvidence();renderInsights();renderAll();
+  let t;window.addEventListener('resize',()=>{clearTimeout(t);t=setTimeout(renderAll,150);});
+}
+if(typeof window!=='undefined'&&!window.__NO_AUTO_INIT)init();
+</script>
+</body>
+</html>
